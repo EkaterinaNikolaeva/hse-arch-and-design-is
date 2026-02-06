@@ -207,6 +207,7 @@ flowchart LR
         UC11(Верификация продавца)
         UC12(Подтверждение заказа)
         UC13(Передача отправления в СД)
+        UC14(Отзыв и оценка товара)
     end
 
     K --> UC0a
@@ -218,6 +219,7 @@ flowchart LR
     K --> UC5
     K --> UC6
     K --> UC7
+    K --> UC14
     P --> UC0a
     P --> UC0b
     P --> UC8
@@ -258,6 +260,7 @@ flowchart TB
                 Auth["Auth Module<br/><i>Аутентификация, авторизация,<br/>управление пользователями</i>"]
                 Catalog["Catalog Module<br/><i>Товары, категории,<br/>поиск, фильтрация</i>"]
                 Order["Order Module<br/><i>Корзина, заказы,<br/>управление статусами</i>"]
+                Recom["Recom Module<br/><i>Отзывы, оценки,<br/>рейтинги товаров</i>"]
                 PaymentSvc["Payment Module<br/><i>Интеграция с платежами</i>"]
                 Notify["Notification Module<br/><i>Отправка email и SMS</i>"]
                 Delivery["Delivery Module<br/><i>Интеграция с доставкой</i>"]
@@ -286,6 +289,7 @@ flowchart TB
     API --> Auth
     API --> Catalog
     API --> Order
+    API --> Recom
     
     Auth --> DB
     Auth --> Cache
@@ -295,6 +299,10 @@ flowchart TB
     
     Catalog --> DB
     Catalog --> Cache
+    Catalog -->|"Рейтинги, отзывы для карточки и сортировки"| Recom
+    
+    Recom --> DB
+    Recom --> Cache
     
     Order --> DB
     Order -->|"Инициация платежа"| PaymentSvc
@@ -322,6 +330,7 @@ flowchart TB
 | Auth Module | Регистрация, вход (пароль, OAuth, SMS, email), JWT/сессии, роли, верификация продавцов через ФНС |
 | Catalog Module | CRUD товаров, категории, полнотекстовый поиск, фильтрация |
 | Order Module | Корзина, создание заказов, управление статусами заказа; интерфейс для продавца: подтверждение заказа, передача в доставку |
+| Recom Module | Отзывы и оценки на товары, рейтинги, черновики отзывов; агрегаты для сортировки и карточки товара |
 | Payment Module | Адаптер к внешним платёжным провайдерам, обработка платежей и возвратов |
 | Notification Module | Единая точка отправки email/SMS, шаблонизация |
 | Delivery Module | Адаптер к внешним API доставки, маппинг статусов |
@@ -376,22 +385,46 @@ flowchart TB
     CatalogMgr --> CatalogRepo
     CatalogRepo --> DB[("PostgreSQL")]
     CatalogMgr --> Cache[("Redis")]
+    CatalogMgr -->|"Рейтинги, отзывы для карточки и сортировки"| Recom["Recom Module"]
 ```
 
-### 4.3. Матрица зависимостей модулей
+### 4.3. Диаграмма компонентов Recom Module
 
-| Модуль ↓ зависит от -> | Auth | Catalog | Order | Payment | Notify | Delivery | Внешние системы |
-|------------------------|:----:|:-------:|:-----:|:-------:|:------:|:--------:|-----------------|
-| Auth Module | - | - | - | - | ✓ | - | OAuth, ФНС |
-| Catalog Module | - | - | - | - | - | - | - |
-| Order Module | - | - | - | ✓ | ✓ | ✓ | - |
-| Payment Module | - | - | - | - | - | - | Платёжный провайдер |
-| Notification Module | - | - | - | - | - | - | Email, SMS |
-| Delivery Module | - | - | - | - | - | - | Сервис доставки |
+```mermaid
+flowchart TB
+    subgraph RecomModule ["Recom Module"]
+        ReviewCtrl["ReviewController<br/><i>Отзывы, оценки, черновики</i>"]
+        RatingCtrl["RatingController<br/><i>Рейтинги для каталога</i>"]
+        RecomMgr["RecomManager<br/><i>Бизнес-логика отзывов и рейтингов</i>"]
+        RecomRepo["RecomRepository<br/><i>Доступ к отзывам и оценкам</i>"]
+    end
+
+    API["API Gateway"] --> ReviewCtrl
+    API --> RatingCtrl
+    ReviewCtrl --> RecomMgr
+    RatingCtrl --> RecomMgr
+    RecomMgr --> RecomRepo
+    RecomRepo --> DB[("PostgreSQL")]
+    RecomMgr --> Cache[("Redis")]
+    CatalogCtrl["CatalogController"] -->|"Запрос рейтингов"| RatingCtrl
+```
+
+### 4.4. Матрица зависимостей модулей
+
+| Модуль ↓ зависит от -> | Auth | Catalog | Order | Recom | Payment | Notify | Delivery | Внешние системы |
+|------------------------|:----:|:-------:|:-----:|:-----:|:-------:|:------:|:--------:|-----------------|
+| Auth Module | - | - | - | - | - | ✓ | - | OAuth, ФНС |
+| Catalog Module | - | - | - | ✓ | - | - | - | - |
+| Order Module | - | - | - | - | ✓ | ✓ | ✓ | - |
+| Recom Module | - | - | - | - | - | - | - | - |
+| Payment Module | - | - | - | - | - | - | - | Платёжный провайдер |
+| Notification Module | - | - | - | - | - | - | - | Email, SMS |
+| Delivery Module | - | - | - | - | - | - | - | Сервис доставки |
 
 Принципы зависимостей:
 
-- Catalog Module не имеет внешних зависимостей
+- Catalog Module зависит от Recom для отображения рейтингов и отзывов в карточке товара и сортировки выдачи
+- Recom Module не имеет зависимостей от других доменных модулей (проверка права на отзыв выполняется через API → Order)
 - Notification Module - единая точка для всех исходящих сообщений
 - Payment Module и Delivery Module - адаптеры к внешним системам
 - Order Module - координирует платёж, доставку, уведомления
