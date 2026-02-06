@@ -522,7 +522,34 @@ sequenceDiagram
     end
 ```
 
-### 5.2. Вход по телефону (SMS-код)
+### 5.5. Оставление отзыва на товар после покупки товара
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Buyer as Покупатель
+    participant Web as Веб-приложение
+    participant API as API Gateway
+    participant Order as Order Module
+    participant Recommendations as Recommendations Module
+
+    Buyer ->> Web: Кнопка "Написать отзывать" в карточке товара
+    Web ->> API: Проверка разрешения написания отзыва
+    API ->> Order: Проверка заказа товара покупателем
+    Order -->> API: Информация о заказе товара покупателем
+    alt Покупатель заказывал товар
+        Buyer ->> Web: Набор отзыва
+        Web ->> API: Сохранение черновика отзыва
+        API ->> Recommendations: Сохранение черновика отзыва
+        Buyer ->> Web: Нажать на кнопку "Опубликовать отзыв"
+        Web ->> API: Публикация отзыва
+        API ->> Recommendations: Публикация отзыва
+    else Покупатель не заказывал товар
+        Web-->>Buyer: Ошибка
+    end
+```
+
+### 5.6. Вход по телефону (SMS-код)
 
 ```mermaid
 sequenceDiagram
