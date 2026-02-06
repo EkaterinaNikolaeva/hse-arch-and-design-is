@@ -114,7 +114,7 @@
 |----------------|-------------|
 | Web-приложение | Пользователи (клиенты, продавцы) |
 | Backend API | Платёжные провайдеры |
-| Доменные сервисы | Службы доставки |
+| Доменные модули | Службы доставки |
 | Хранилища данных | Email/SMS-провайдеры |
 | | OAuth-провайдеры |
 | | API ФНС |
@@ -246,13 +246,13 @@ flowchart TB
         subgraph backend ["Backend"]
             API["API Gateway<br/><i>REST API</i><br/>Маршрутизация, <br/>аутентификация запросов"]
             
-            subgraph services ["Доменные сервисы"]
-                Auth["Auth Service<br/><i>Аутентификация, авторизация,<br/>управление пользователями</i>"]
-                Catalog["Catalog Service<br/><i>Товары, категории,<br/>поиск, фильтрация</i>"]
-                Order["Order Service<br/><i>Корзина, заказы,<br/>управление статусами</i>"]
-                PaymentSvc["Payment Service<br/><i>Интеграция с платежами</i>"]
-                Notify["Notification Service<br/><i>Отправка email и SMS</i>"]
-                Delivery["Delivery Service<br/><i>Интеграция с доставкой</i>"]
+            subgraph modules ["Доменные модули"]
+                Auth["Auth Module<br/><i>Аутентификация, авторизация,<br/>управление пользователями</i>"]
+                Catalog["Catalog Module<br/><i>Товары, категории,<br/>поиск, фильтрация</i>"]
+                Order["Order Module<br/><i>Корзина, заказы,<br/>управление статусами</i>"]
+                PaymentSvc["Payment Module<br/><i>Интеграция с платежами</i>"]
+                Notify["Notification Module<br/><i>Отправка email и SMS</i>"]
+                Delivery["Delivery Module<br/><i>Интеграция с доставкой</i>"]
             end
         end
         
@@ -311,12 +311,12 @@ flowchart TB
 |-----------|-----------------|
 | Web Application | Пользовательский интерфейс, работа в браузере |
 | API Gateway | Единая точка входа, маршрутизация, JWT-валидация |
-| Auth Service | Регистрация, вход (пароль, OAuth, SMS, email), JWT/сессии, роли, верификация продавцов через ФНС |
-| Catalog Service | CRUD товаров, категории, полнотекстовый поиск, фильтрация |
-| Order Service | Корзина, создание заказов, управление статусами заказа; интерфейс для продавца: подтверждение заказа, передача в доставку |
-| Payment Service | Адаптер к внешним платёжным провайдерам, обработка платежей и возвратов |
-| Notification Service | Единая точка отправки email/SMS, шаблонизация |
-| Delivery Service | Адаптер к внешним API доставки, маппинг статусов |
+| Auth Module | Регистрация, вход (пароль, OAuth, SMS, email), JWT/сессии, роли, верификация продавцов через ФНС |
+| Catalog Module | CRUD товаров, категории, полнотекстовый поиск, фильтрация |
+| Order Module | Корзина, создание заказов, управление статусами заказа; интерфейс для продавца: подтверждение заказа, передача в доставку |
+| Payment Module | Адаптер к внешним платёжным провайдерам, обработка платежей и возвратов |
+| Notification Module | Единая точка отправки email/SMS, шаблонизация |
+| Delivery Module | Адаптер к внешним API доставки, маппинг статусов |
 | Персистентное хранилище | Хранение пользователей, товаров, заказов (например PostgreSQL) |
 | Кэш | Кэш каталога, сессии (например Redis) |
 
@@ -324,26 +324,26 @@ flowchart TB
 
 ## 4. Компоненты системы (C4 Level 3)
 
-Детализация внутренней структуры ключевых контейнеров.
+Детализация внутренней структуры ключевых контейнеров. Примеры особенно сложных систем
 
-### 4.1. Диаграмма компонентов на примерер Order Service
+### 4.1. Диаграмма компонентов Order Module
 
 ```mermaid
 flowchart TB
-    subgraph OrderService ["Order Service"]
-        CartCtrl["CartController<br/><i>REST endpoints корзины</i>"]
-        OrderCtrl["OrderController<br/><i>REST endpoints заказов (клиент)</i>"]
-        SellerOrderCtrl["SellerOrderController<br/><i>Подтверждение, статусы,<br/>передача в доставку</i>"]
+    subgraph OrderModule ["Order Module"]
+        CartCtrl["CartController<br/><i>Корзина</i>"]
+        BuyerOrderCtrl["BuyerOrderController<br/><i>Оформление заказа,<br/>просмотр своих заказов</i>"]
+        SellerOrderCtrl["SellerOrderController<br/><i>Подтверждение заказа,<br/>передача в доставку</i>"]
         CartMgr["CartManager<br/><i>Бизнес-логика корзины</i>"]
         OrderMgr["OrderManager<br/><i>Создание и управление заказами</i>"]
         OrderRepo["OrderRepository<br/><i>Доступ к данным заказов</i>"]
     end
 
     API["API Gateway"] --> CartCtrl
-    API --> OrderCtrl
+    API --> BuyerOrderCtrl
     API --> SellerOrderCtrl
     CartCtrl --> CartMgr
-    OrderCtrl --> OrderMgr
+    BuyerOrderCtrl --> OrderMgr
     SellerOrderCtrl --> OrderMgr
     CartMgr --> OrderRepo
     OrderMgr --> OrderRepo
@@ -353,23 +353,40 @@ flowchart TB
     OrderMgr --> DeliveryCtrl["DeliveryController"]
 ```
 
-### 4.2. Матрица зависимостей сервисов
+### 4.2. Диаграмма компонентов Catalog Module
 
-| Сервис ↓ зависит от -> | Auth | Catalog | Order | Payment | Notify | Delivery | Внешние системы |
-|-----------------------|:----:|:-------:|:-----:|:-------:|:------:|:--------:|-----------------|
-| Auth Service | - | - | - | - | ✓ | - | OAuth, ФНС |
-| Catalog Service | - | - | - | - | - | - | - |
-| Order Service | - | - | - | ✓ | ✓ | ✓ | - |
-| Payment Service | - | - | - | - | - | - | Платёжный провайдер |
-| Notification Service | - | - | - | - | - | - | Email, SMS |
-| Delivery Service | - | - | - | - | - | - | Сервис доставки |
+```mermaid
+flowchart TB
+    subgraph CatalogModule ["Catalog Module"]
+        CatalogCtrl["CatalogController<br/><i>Товары, категории, поиск</i>"]
+        CatalogMgr["CatalogManager<br/><i>Бизнес-логика</i>"]
+        CatalogRepo["CatalogRepository<br/><i>Доступ к данным</i>"]
+    end
+
+    API["API Gateway"] --> CatalogCtrl
+    CatalogCtrl --> CatalogMgr
+    CatalogMgr --> CatalogRepo
+    CatalogRepo --> DB[("PostgreSQL")]
+    CatalogMgr --> Cache[("Redis")]
+```
+
+### 4.3. Матрица зависимостей модулей
+
+| Модуль ↓ зависит от -> | Auth | Catalog | Order | Payment | Notify | Delivery | Внешние системы |
+|------------------------|:----:|:-------:|:-----:|:-------:|:------:|:--------:|-----------------|
+| Auth Module | - | - | - | - | ✓ | - | OAuth, ФНС |
+| Catalog Module | - | - | - | - | - | - | - |
+| Order Module | - | - | - | ✓ | ✓ | ✓ | - |
+| Payment Module | - | - | - | - | - | - | Платёжный провайдер |
+| Notification Module | - | - | - | - | - | - | Email, SMS |
+| Delivery Module | - | - | - | - | - | - | Сервис доставки |
 
 Принципы зависимостей:
 
-- Catalog Service не имеет внешних зависимостей
-- Notification Service - единая точка для всех исходящих сообщений
-- Payment Service и Delivery Service - адаптеры к внешним системам
-- Order Service - координирует платёж, доставку, уведомления
+- Catalog Module не имеет внешних зависимостей
+- Notification Module - единая точка для всех исходящих сообщений
+- Payment Module и Delivery Module - адаптеры к внешним системам
+- Order Module - координирует платёж, доставку, уведомления
 
 ---
 
@@ -383,11 +400,11 @@ sequenceDiagram
     actor Client as Клиент
     participant Web as Веб-приложение
     participant API as API Gateway
-    participant Order as Order Service
-    participant Auth as Auth Service
-    participant Payment as Payment Service
+    participant Order as Order Module
+    participant Auth as Auth Module
+    participant Payment as Payment Module
     participant Pay as Платёжный провайдер
-    participant Notify as Notification Service
+    participant Notify as Notification Module
 
     Client->>Web: Нажимает "Оформить заказ"
     Web->>API: Запрос на создание заказа
@@ -425,10 +442,10 @@ sequenceDiagram
     actor Seller as Продавец
     participant Web as Веб-приложение
     participant API as API Gateway
-    participant Order as Order Service
-    participant Delivery as Delivery Service
+    participant Order as Order Module
+    participant Delivery as Delivery Module
     participant ExtDelivery as Сервис доставки
-    participant Notify as Notification Service
+    participant Notify as Notification Module
 
     Note over Seller, Web: Шаг 1: Подтверждение заказа
     Seller->>Web: Открывает заказы (статус PAID)
@@ -465,9 +482,9 @@ sequenceDiagram
     actor Buyer as Покупатель
     participant ExtDelivery as Сервис доставки
     participant API as API Gateway
-    participant Delivery as Delivery Service
-    participant Order as Order Service
-    participant Notify as Notification Service
+    participant Delivery as Delivery Module
+    participant Order as Order Module
+    participant Notify as Notification Module
 
     Note over Seller, ExtDelivery: Шаг 3: Передача в СД
     Seller->>ExtDelivery: Приносит посылку в пункт приёма
@@ -505,8 +522,8 @@ sequenceDiagram
     actor User as Пользователь
     participant Web as Веб-приложение
     participant API as API Gateway
-    participant Auth as Auth Service
-    participant Notify as Notification Service
+    participant Auth as Auth Module
+    participant Notify as Notification Module
     participant SMS as SMS-провайдер
 
     User->>Web: Вводит номер телефона
@@ -547,11 +564,11 @@ sequenceDiagram
 | Масштабирование | Вертикальное + горизонтальное (реплики) | Независимое по сервисам | Достаточно для начального этапа |
 | Эволюция в микросервисы | Возможна | - | Модули можно выносить по мере роста |
 
-Жертвуем независимым масштабированием отдельных функций ради простоты и скорости разработки на старте. Модульные границы позволят при необходимости вынести каталог или уведомления в отдельные сервисы.
+Жертвуем независимым масштабированием отдельных функций ради простоты и скорости разработки на старте. Модульные границы позволят при необходимости вынести каталог или уведомления в отдельные микросервисы.
 
 ### 6.2. Архитектурный паттерн: Controller + Manager + Repository/Adapter
 
-Внутри каждого сервиса используется трёхслойная структура:
+Внутри каждого модуля используется трёхслойная структура:
 
 | Слой | Назначение | Примеры |
 |------|------------|---------|
@@ -559,7 +576,7 @@ sequenceDiagram
 | Manager | Бизнес-логика, оркестрация операций | OrderManager, CartManager |
 | Repository / Adapter | Доступ к данным (Repository) или интеграция с внешними системами (Adapter) | OrderRepository, PaymentAdapter, EmailAdapter |
 
-При межсервисном взаимодействии один сервис обращается к Controller другого сервиса (а не напрямую к Manager), что обеспечивает чёткие границы и контракты между модулями.
+При межмодульном взаимодействии один модуль обращается к Controller другого модуля (а не напрямую к Manager), что обеспечивает чёткие границы и контракты между модулями.
 
 ### 6.3. Асинхронная обработка
 
@@ -580,7 +597,7 @@ sequenceDiagram
 | Контекст | Нужна архитектура, которая позволит быстро развивать продукт на начальном этапе |
 | Решение | Модульный монолит с чётким разделением на доменные модули |
 | Альтернативы | Микросервисы с самого начала |
-| Обоснование | Простота разработки и развёртывания; низкая латентность между модулями; модульные границы позволят при необходимости выделить сервисы |
+| Обоснование | Простота разработки и развёртывания; низкая латентность между модулями; модульные границы позволят при необходимости выделить микросервисы |
 | Последствия | (+) Быстрый старт, единая кодовая база. (−) Вертикальное масштабирование, общий деплой |
 
 #### ADR-002: Платежи через внешнего провайдера
@@ -593,12 +610,12 @@ sequenceDiagram
 | Обоснование | PCI DSS compliance - дорого и сложно на старте; провайдеры берут ответственность на себя |
 | Последствия | (+) Нет PCI DSS scope, меньше рисков, быстрый запуск. (−) Комиссия провайдера, зависимость от внешнего API. При росте объёмов возможен переход на собственную платёжную систему |
 
-#### ADR-003: Единый Notification Service с отдельными адаптерами
+#### ADR-003: Единый Notification Module с отдельными адаптерами
 
 | Аспект | Описание |
 |--------|----------|
 | Контекст | Несколько модулей должны отправлять уведомления (Auth - коды, Order - статусы) |
-| Решение | Выделенный Notification Service как единая точка отправки с отдельными адаптерами для каждого канала (EmailAdapter, SMSAdapter) |
+| Решение | Выделенный Notification Module как единая точка отправки с отдельными адаптерами для каждого канала (EmailAdapter, SMSAdapter) |
 | Альтернативы | Каждый модуль обращается к email/SMS напрямую |
 | Обоснование | Единообразие шаблонов, централизованный контроль; адаптеры позволяют легко менять провайдеров |
 | Последствия | (+) Единая точка контроля, простая смена провайдера. (−) Дополнительная зависимость между модулями |
@@ -618,8 +635,8 @@ sequenceDiagram
 При росте нагрузки и бизнеса возможны следующие шаги:
 
 1. Load Balancer перед API Gateway - добавление балансировщика нагрузки для распределения запросов между репликами
-2. Горизонтальное масштабирование - добавление реплик API и сервисов за балансировщиком
-3. Выделение любого модуля в отдельный сервис - модульные границы позволяют при необходимости вынести Catalog, Notification или другой модуль в независимый микросервис
+2. Горизонтальное масштабирование - добавление реплик API и модулей за балансировщиком
+3. Выделение любого модуля в отдельный микросервис - модульные границы позволяют при необходимости вынести Catalog, Notification или другой модуль в независимый микросервис
 4. Собственная платёжная система - при достижении объёмов, когда экономия на комиссии провайдера превысит затраты на PCI DSS compliance и разработку, возможен переход на собственный эквайринг
 
 ---
