@@ -694,18 +694,26 @@ flowchart TB
         Owner["Владелец"]
     end
 
+    subgraph interfaces ["Интерфейсы"]
+        subgraph web ["Веб-приложение"]
+            WebApp["Web-приложение"]
+            LocalDatabase[("Local DB<br/><i>IndexedDB</i>")]
+            SyncService["Sync Service"]
+            WebApp --> |"Сохранение оффлайн изменений, чтение истории"| LocalDatabase
+            SyncService --> |"Получение оффлайн изменений, сохранение обновлений"| LocalDatabase
+        end
+
+        subgraph mobile ["Мобильное приложение"]
+            Mobile["Mobile App"]
+            LocalMobileDatabase[("Local DB<br/><i>SQLite</i>")]
+            SyncMobileService["Sync Mobile Service"]
+            Mobile --> |"Сохранение оффлайн изменений, чтение истории"| LocalMobileDatabase
+            SyncMobileService --> |"Получение оффлайн изменений, сохранение обновлений"| LocalMobileDatabase
+        end
+    end
+
     subgraph mis ["Медицинская информационная система (МИС)"]
-        WebApp["Web-приложение"]
-        Mobile["Mobile App"]
-
-        LocalMobileDatabase[("Local<br/><i>Mobile Database</i>")]
-
-        LocalDatabase[("Local<br/><i>Database</i>")]
-
-        SyncMobileService["Sync Mobile Service"]
-        SyncService["Sync Service"]
         SyncRemoteService["Sync Remote Service"]
-
         API["API Gateway"]
 
         subgraph svc_auth ["Auth"]
@@ -745,18 +753,7 @@ flowchart TB
         DB[("DB<br/><i>PostgreSQL</i>")]
         Queue[("Message Queue<br/><i>Kafka / RabbitMQ</i>")]
 
-        Mobile --> |"Сохранение оффлайн изменений, чтение истории"| LocalMobileDatabase
-        WebApp --> |"Сохранение оффлайн изменений, чтение истории"| LocalDatabase
-        
-        SyncMobileService --> |"Получение оффлайн изменений, сохранение обновлений"| LocalMobileDatabase
-        SyncMobileService --> API
-        SyncService --> |"Получение оффлайн изменений, сохранение обновлений"| LocalDatabase
-        SyncService --> API
-
-        API --> |"Обработка оффлайн изменений, получений обновлений"| SyncRemoteService
         SyncRemoteService --> |"Сохранение оффлайн изменений, получение обновлений"| DB
-
-
         Auth --> DB
         Scheduling --> DB
         EMR --> DB
@@ -783,6 +780,9 @@ flowchart TB
 
     WebApp -->|"HTTPS/REST"| API
     Mobile -->|"HTTPS/REST"| API
+    SyncService -->|"HTTPS"| API
+    SyncMobileService -->|"HTTPS"| API
+    API --> |"Обработка оффлайн изменений, получение обновлений"| SyncRemoteService
 
     API --> Auth
     API --> Scheduling
