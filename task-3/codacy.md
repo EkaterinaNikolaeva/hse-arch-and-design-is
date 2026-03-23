@@ -22,5 +22,34 @@ Codacy — это автоматизированная платформа для
 
 ## Полученные issues (избранные)
 
+### Проблемы безопасности и надежности
 
+1. CloseResource
 
+`Ensure that resources like this <...> object are closed after use`
+
+Описание: Ресурсы (файлы, сокеты, каналы, ...) не закрыты, что может привести к утечкам памяти и дескрипторов
+
+Встречается 95 раз
+
+Риск: Высокий. Утечки ресурсов могут привести к падению приложения при длительной работе
+
+2. AvoidAccessibilityAlteration
+
+`You should not modify visibility of constructors, methods or fields using setAccessible()`
+
+Описание: Использование `setAccessible(true)` для обхода модификаторов доступа
+
+Встречается 2 раза
+
+Риск: Высокий. Нарушает инкапсуляцию, привести к нестабильности при обновленияи версий JVM
+
+3. ReturnEmptyCollectionRatherThanNull
+
+`Return an empty collection rather than null`
+
+Описание: Методы возвращают null вместо пустой коллекции, что повышает риск NullPointerException у вызывающего кода
+
+Встречается 4 раза
+
+Риск: Средний. Увеличивает вероятность ошибок в клиентском коде
