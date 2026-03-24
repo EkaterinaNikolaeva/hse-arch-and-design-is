@@ -137,3 +137,89 @@ Codacy — это автоматизированная платформа для
 Встречается 14 раз
 
 Риск: низкий
+
+### Многопоточность
+
+1. AvoidUsingVolatile
+
+`Use of modifier volatile is not recommended.`
+
+Описание: Использование модификатора volatile не рекомендуется
+
+Встречается 6 раз
+
+Риск: низкий
+
+2. UseNotifyAllInsteadOfNotify
+
+`Call Thread.notifyAll() rather than Thread.notify()`
+
+Описание: Использование `notify()` вместо `notifyAll()` будит только 1 поток, что может быть логической ошибкой, если больше одного потока ждут сигнал
+
+Встречается 2 раза
+
+Риск: средний, но часты ложноположительные срабатывания
+
+3. AssignmentToNonFinalStatic
+
+`Possible unsafe assignment to a non-final static field in a constructor`
+
+Описание: Изменение статической переменной в конструкторе не является потоко-безопасным
+
+Встречается 1 раз
+
+Риск: средний
+
+### Ошибки
+
+1. CompareObjectsWithEquals
+
+`Use equals() to compare object references.`
+
+Описание: Сравнение ==, а не equals может работать некорректно (будут сравниваться ссылки)
+
+Встречается 8 раз
+
+Риск: средний
+
+2. IdenticalCatchBranches
+
+`<...> branch identical to <...> branch`
+
+Описание: одинаковые catch блоки для разных типов исключений
+
+Встречается 5 раз
+
+Риск: низкий
+
+3. AssignmentInOperand
+
+`Avoid assignments in operands`
+
+Описание: Следует избегать присваиваний в условиях
+
+Встречается 4 раза
+
+Риск: низкий
+
+### Архитектура
+
+1. SingleMethodSingleton
+
+`Class contains multiple getInstance methods. Please review.`
+
+Описание: Класс содержит несколько методов, возвращающих экземпляр, что противоречит паттерну Singleton
+
+Встречается 2 раза
+
+Риск: низкий
+
+2. UseUtilityClass
+
+`All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning`
+
+Описание: Класс содержит только статические методы, но не имеет приватного конструктора, что позволяет создавать его экземпляры
+
+Встречается 1 раз
+
+Риск: низкий
