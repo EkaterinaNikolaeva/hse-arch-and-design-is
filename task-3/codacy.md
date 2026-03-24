@@ -53,3 +53,87 @@ Codacy — это автоматизированная платформа для
 Встречается 4 раза
 
 Риск: Средний. Увеличивает вероятность ошибок в клиентском коде
+
+4. PreserveStackTrace
+
+`New exception is thrown in catch block, original stack trace may be lost`
+
+Описание: Потеря корневой причины исключения
+
+Встречается 1 раз
+
+Риск: Средний. Усложняет отладку
+
+5. EmptyCatchBlock
+
+`Avoid empty catch blocks`
+
+Описание: Исключения перехватываются, но игнорируются, что может скрывать критические ошибки
+
+Встречается 3 раза
+
+Риск: Высокий. Подавление исключений может привести к ошибкам в работе системы
+
+### Производительность
+
+1. GuardLogStatement
+
+`Logger calls should be surrounded by log level guards`
+
+Описание: Не проверяется включенность данного уровня логгирования, что может приводить к бесполезным тратам CPU, если уровень выключен
+
+Встречается 115 раз
+
+Риск: средний, если нагрузка высокая, генерируется очень много логов
+
+2. AvoidStringBufferField
+
+`StringBuffers can grow quite a lot, and so may become a source of memory leak (if the owning class has a long life time)`
+
+Описание: StringBuffers не следуюет использовать как поля классов, так как они быстро разрастаются и могут стать причиной утечки памяти
+
+Встречается 4 раза
+
+Ризк: низкий
+
+### Стиль кода
+
+1. UnnecessaryConstructor + UncommentedEmptyConstructor
+
+`Unnecessary use of fully qualified name <...> due to existing same package import <...>`
+
+Описание: Дефолтный (пустой) конструктор и так генерируется компиллятором, можно не писать
+
+Встречается 35 раз
+
+Риск: низкий
+
+2. ForLoopCanBeForeach
+
+`This for loop can be replaced by a foreach loop`
+
+Описание: Можно заменить цикл на современный for each
+
+Встречается 15 раз
+
+Риск: низкий
+
+3. LooseCoupling
+
+`Avoid using implementation types like <...>; use the interface instead`
+
+Описание: Использование конкретных реализациях как типы полей вместо интерфейсов
+
+Встречается 26 раз
+
+Риск: низкий
+
+4. UnnecessaryFullyQualifiedName
+
+`Unnecessary use of fully qualified name <...> due to existing same package import <...>`
+
+Описание: Использование полного имени вместо простого при наличии импорта
+
+Встречается 14 раз
+
+Риск: низкий
