@@ -1,0 +1,19 @@
+Top files by average cyclomatic complexity (radon cc):
+- requests.__init__: avg=6.50, max=10, items=2
+- requests.status_codes: avg=6.00, max=6, items=1
+- requests.utils: avg=4.57, max=18, items=42
+- requests.models: avg=4.46, max=21, items=48
+- requests.help: avg=4.33, max=6, items=3
+- requests.sessions: avg=4.07, max=15, items=30
+- requests.hooks: avg=4.00, max=6, items=2
+- requests.compat: avg=4.00, max=4, items=1
+
+Lowest maintainability index (radon mi):
+- requests.models: mi=21.73, rank=A
+- requests.utils: mi=25.04, rank=A
+- requests.sessions: mi=38.07, rank=A
+- requests.cookies: mi=39.76, rank=A
+- requests.auth: mi=47.35, rank=A
+- requests.adapters: mi=47.52, rank=A
+- requests.help: mi=59.65, rank=A
+- requests.certs: mi=64.36, rank=A
