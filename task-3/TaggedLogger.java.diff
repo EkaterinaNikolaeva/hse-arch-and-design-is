@@ -1,0 +1,604 @@
+diff --git a/tinylog-api/src/main/java/org/tinylog/TaggedLogger.java b/tinylog-api/src/main/java/org/tinylog/TaggedLogger.java
+index 371d4a20..d852bde7 100644
+--- a/tinylog-api/src/main/java/org/tinylog/TaggedLogger.java
++++ b/tinylog-api/src/main/java/org/tinylog/TaggedLogger.java
+@@ -55,6 +55,14 @@ public final class TaggedLogger {
+ 
+ 	private final Set<String> tags;
+ 
++	private void logIfEnabled(final boolean minimumLevelCovers, final Set<String> tags, final Level level, final Throwable exception, final MessageFormatter formatter, final Object message, final Object[] arguments) {
++		if (minimumLevelCovers) {
++			for (String tag : tags) {
++				provider.log(STACKTRACE_DEPTH, tag, level, exception, formatter, message, arguments);
++			}
++		}
++	}
++
+ 	/**
+ 	 * @param tag
+ 	 *            Case-sensitive tag for logger instance
+@@ -100,11 +108,7 @@ public final class TaggedLogger {
+ 	 *            String or any other object with a meaningful {@link #toString()} method
+ 	 */
+ 	public void trace(final Object message) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -115,11 +119,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void trace(final Supplier<?> message) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -132,11 +132,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void trace(final String message, final Object... arguments) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, null, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, null, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -149,11 +145,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void trace(final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, null, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, null, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -163,11 +155,7 @@ public final class TaggedLogger {
+ 	 *            Caught exception or any other throwable to log
+ 	 */
+ 	public void trace(final Throwable exception) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, exception, null, null, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, exception, null, null, null);
+ 	}
+ 
+ 	/**
+@@ -179,11 +167,7 @@ public final class TaggedLogger {
+ 	 *            Text message to log
+ 	 */
+ 	public void trace(final Throwable exception, final String message) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -196,11 +180,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void trace(final Throwable exception, final Supplier<String> message) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -215,11 +195,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void trace(final Throwable exception, final String message, final Object... arguments) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, exception, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, exception, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -234,11 +210,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void trace(final Throwable exception, final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversTrace) {
+-			for (String tag : traceTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.TRACE, exception, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversTrace, traceTags, Level.TRACE, exception, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -257,11 +229,7 @@ public final class TaggedLogger {
+ 	 *            String or any other object with a meaningful {@link #toString()} method
+ 	 */
+ 	public void debug(final Object message) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -272,11 +240,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void debug(final Supplier<?> message) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -289,11 +253,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void debug(final String message, final Object... arguments) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, null, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, null, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -306,11 +266,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void debug(final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, null, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, null, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -320,11 +276,7 @@ public final class TaggedLogger {
+ 	 *            Caught exception or any other throwable to log
+ 	 */
+ 	public void debug(final Throwable exception) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, exception, null, null, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, exception, null, null, null);
+ 	}
+ 
+ 	/**
+@@ -336,11 +288,7 @@ public final class TaggedLogger {
+ 	 *            Text message to log
+ 	 */
+ 	public void debug(final Throwable exception, final String message) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -353,11 +301,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void debug(final Throwable exception, final Supplier<String> message) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -372,11 +316,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void debug(final Throwable exception, final String message, final Object... arguments) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, exception, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, exception, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -391,11 +331,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void debug(final Throwable exception, final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversDebug) {
+-			for (String tag : debugTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.DEBUG, exception, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversDebug, debugTags, Level.DEBUG, exception, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -414,11 +350,7 @@ public final class TaggedLogger {
+ 	 *            String or any other object with a meaningful {@link #toString()} method
+ 	 */
+ 	public void info(final Object message) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -429,11 +361,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void info(final Supplier<?> message) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -445,11 +373,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void info(final String message, final Object... arguments) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, null, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, null, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -462,11 +386,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void info(final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, null, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, null, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -476,11 +396,7 @@ public final class TaggedLogger {
+ 	 *            Caught exception or any other throwable to log
+ 	 */
+ 	public void info(final Throwable exception) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, exception, null, null, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, exception, null, null, null);
+ 	}
+ 
+ 	/**
+@@ -492,11 +408,7 @@ public final class TaggedLogger {
+ 	 *            Text message to log
+ 	 */
+ 	public void info(final Throwable exception, final String message) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -509,11 +421,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void info(final Throwable exception, final Supplier<String> message) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -528,11 +436,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void info(final Throwable exception, final String message, final Object... arguments) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, exception, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, exception, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -547,11 +451,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void info(final Throwable exception, final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversInfo) {
+-			for (String tag : infoTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.INFO, exception, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversInfo, infoTags, Level.INFO, exception, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -570,11 +470,7 @@ public final class TaggedLogger {
+ 	 *            String or any other object with a meaningful {@link #toString()} method
+ 	 */
+ 	public void warn(final Object message) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -585,11 +481,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void warn(final Supplier<?> message) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -602,11 +494,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void warn(final String message, final Object... arguments) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, null, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, null, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -619,11 +507,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void warn(final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, null, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, null, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -633,11 +517,7 @@ public final class TaggedLogger {
+ 	 *            Caught exception or any other throwable to log
+ 	 */
+ 	public void warn(final Throwable exception) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, exception, null, null, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, exception, null, null, null);
+ 	}
+ 
+ 	/**
+@@ -649,11 +529,7 @@ public final class TaggedLogger {
+ 	 *            Text message to log
+ 	 */
+ 	public void warn(final Throwable exception, final String message) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -666,11 +542,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void warn(final Throwable exception, final Supplier<String> message) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -685,11 +557,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void warn(final Throwable exception, final String message, final Object... arguments) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, exception, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, exception, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -704,11 +572,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void warn(final Throwable exception, final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversWarn) {
+-			for (String tag : warnTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.WARN, exception, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversWarn, warnTags, Level.WARN, exception, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -727,11 +591,7 @@ public final class TaggedLogger {
+ 	 *            String or any other object with a meaningful {@link #toString()} method
+ 	 */
+ 	public void error(final Object message) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -742,11 +602,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void error(final Supplier<?> message) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, null, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, null, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -759,11 +615,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void error(final String message, final Object... arguments) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, null, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, null, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -776,11 +628,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void error(final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, null, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, null, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
+@@ -790,11 +638,7 @@ public final class TaggedLogger {
+ 	 *            Caught exception or any other throwable to log
+ 	 */
+ 	public void error(final Throwable exception) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, exception, null, null, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, exception, null, null, null);
+ 	}
+ 
+ 	/**
+@@ -806,11 +650,7 @@ public final class TaggedLogger {
+ 	 *            Text message to log
+ 	 */
+ 	public void error(final Throwable exception, final String message) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -823,11 +663,7 @@ public final class TaggedLogger {
+ 	 *            Function that produces the message
+ 	 */
+ 	public void error(final Throwable exception, final Supplier<String> message) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, exception, null, message, (Object[]) null);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, exception, null, message, null);
+ 	}
+ 
+ 	/**
+@@ -842,11 +678,7 @@ public final class TaggedLogger {
+ 	 *            Arguments for formatted text message
+ 	 */
+ 	public void error(final Throwable exception, final String message, final Object... arguments) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, exception, formatter, message, arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, exception, formatter, message, arguments);
+ 	}
+ 
+ 	/**
+@@ -861,11 +693,7 @@ public final class TaggedLogger {
+ 	 *            Functions that produce the arguments for formatted text message
+ 	 */
+ 	public void error(final Throwable exception, final String message, final Supplier<?>... arguments) {
+-		if (minimumLevelCoversError) {
+-			for (String tag : errorTags) {
+-				provider.log(STACKTRACE_DEPTH, tag, Level.ERROR, exception, formatter, message, (Object[]) arguments);
+-			}
+-		}
++		logIfEnabled(minimumLevelCoversError, errorTags, Level.ERROR, exception, formatter, message, (Object[]) arguments);
+ 	}
+ 
+ 	/**
